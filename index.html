@@ -121,7 +121,7 @@
             <section id="tab-dashboard" class="tab-content space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Saldo Estimado</span>
+                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Patrimônio / Saldo Total</span>
                         <div class="text-2xl font-bold text-gray-900 dark:text-white mt-1" id="dashTotalBalance">R$ 0,00</div>
                     </div>
                     <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
@@ -147,6 +147,7 @@
                             <option value="ALL">Todos os Tipos</option>
                             <option value="EXPENSE">Despesas</option>
                             <option value="INCOME">Receitas</option>
+                            <option value="TRANSFER">Transferências</option>
                         </select>
                         <select id="txFilterCategory" onchange="renderTransactions()" class="bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 text-sm rounded-xl px-3 py-2 text-gray-900 dark:text-white">
                             <option value="ALL">Todas as Categorias</option>
@@ -158,6 +159,7 @@
                             <option value="Salário">Salário</option>
                             <option value="Investimento">Investimento</option>
                             <option value="Outros">Outros</option>
+                            <option value="Transferência">Transferência</option>
                         </select>
                         <input type="text" id="txFilterSearch" oninput="renderTransactions()" placeholder="Buscar por descrição..." class="bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 text-sm rounded-xl px-3 py-2 text-gray-900 dark:text-white">
                     </div>
@@ -172,21 +174,43 @@
                                     <th class="p-4">Data</th>
                                     <th class="p-4">Descrição</th>
                                     <th class="p-4">Categoria</th>
+                                    <th class="p-4">Conta</th>
                                     <th class="p-4">Pagamento</th>
                                     <th class="p-4 text-right">Valor</th>
                                     <th class="p-4 text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="transactionList" class="divide-y divide-gray-200 dark:divide-gray-800">
-                                <!-- Injetado via Javascript de forma segura -->
+                                <!-- Injetado via DOM seguro -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </section>
 
+            <!-- ABA CONTAS & CARTEIRAS -->
+            <section id="tab-accounts" class="tab-content hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white">Suas Contas e Carteiras</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Gerencie contas correntes, poupanças, carteiras e investimentos</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openTransferModal()" class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 border border-gray-700 transition">
+                            <i class="fa-solid fa-right-left"></i> Transferir
+                        </button>
+                        <button onclick="openAccountModal()" class="bg-brand-500 hover:bg-brand-600 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg transition">
+                            <i class="fa-solid fa-plus"></i> Nova Conta
+                        </button>
+                    </div>
+                </div>
+
+                <div id="accountsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Injetado via DOM seguro -->
+                </div>
+            </section>
+
             <!-- Demais abas prontas para próximas etapas -->
-            <section id="tab-accounts" class="tab-content hidden"><div class="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 text-sm">Módulo de Contas pronto para carregamento na Etapa 3.</div></section>
             <section id="tab-cards" class="tab-content hidden"><div class="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 text-sm">Módulo de Cartões pronto para carregamento na Etapa 4.</div></section>
             <section id="tab-loans" class="tab-content hidden"><div class="p-6 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 text-sm">Módulo de Empréstimos pronto para carregamento na Etapa 5.</div></section>
         </main>
@@ -237,14 +261,21 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Forma de Pagamento</label>
-                        <select id="txPaymentMethod" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white">
-                            <option value="Pix">Pix</option>
-                            <option value="Débito">Débito</option>
-                            <option value="Crédito">Crédito</option>
-                            <option value="Dinheiro">Dinheiro</option>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Conta Bancária</label>
+                        <select id="txAccount" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white">
+                            <!-- Preenchido via JS seguro -->
                         </select>
                     </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Forma de Pagamento</label>
+                    <select id="txPaymentMethod" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white">
+                        <option value="Pix">Pix</option>
+                        <option value="Dinheiro">Dinheiro</option>
+                        <option value="Débito">Débito</option>
+                        <option value="Transferência">Transferência</option>
+                        <option value="Outros">Outros</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Observações (Opcional)</label>
@@ -255,6 +286,134 @@
                     <button type="submit" id="btnSaveTx" class="px-4 py-2 text-xs font-semibold bg-brand-500 hover:bg-brand-600 text-white rounded-xl">Salvar Lançamento</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO/EDIÇÃO DE CONTA -->
+    <div id="modalAccount" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 pb-3">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white" id="modalAccountTitle">Nova Conta Bancária</h3>
+                <button onclick="closeModal('modalAccount')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="formAccount" onsubmit="saveAccount(event)" class="space-y-3">
+                <input type="hidden" id="accId">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Nome da Conta</label>
+                    <input type="text" id="accName" required class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white" placeholder="Ex: Conta Corrente Principal, Nubank">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Instituição Financeira</label>
+                        <input type="text" id="accBank" required class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white" placeholder="Ex: Itaú, Nubank, Caixa">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Tipo de Conta</label>
+                        <select id="accType" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white">
+                            <option value="Conta Corrente">Conta Corrente</option>
+                            <option value="Poupança">Poupança</option>
+                            <option value="Dinheiro em Espécie">Dinheiro em Espécie</option>
+                            <option value="Carteira Digital">Carteira Digital</option>
+                            <option value="Investimento">Investimento</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Saldo Inicial (R$)</label>
+                        <input type="number" step="0.01" id="accInitialBalance" required class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white" placeholder="0,00">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Data-Base Saldo Inicial</label>
+                        <input type="date" id="accBaseDate" required class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white">
+                    </div>
+                </div>
+                <p class="text-[11px] text-gray-400">Nota: O saldo inicial é válido na data-base. Apenas movimentações posteriores a esta data somarão ou subtrairão do saldo atual.</p>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Descrição (Opcional)</label>
+                    <input type="text" id="accDescription" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white" placeholder="Ex: Conta usada para despesas diárias">
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-gray-200 dark:border-gray-800">
+                    <button type="button" onclick="closeModal('modalAccount')" class="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-gray-700 dark:hover:text-white">Cancelar</button>
+                    <button type="submit" id="btnSaveAcc" class="px-4 py-2 text-xs font-semibold bg-brand-500 hover:bg-brand-600 text-white rounded-xl">Salvar Conta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE TRANSFERÊNCIA ENTRE CONTAS -->
+    <div id="modalTransfer" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 pb-3">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Transferência entre Contas</h3>
+                <button onclick="closeModal('modalTransfer')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="formTransfer" onsubmit="saveTransfer(event)" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Conta de Origem</label>
+                        <select id="transferFrom" required onchange="validateTransferAccounts()" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white">
+                            <!-- Preenchido via JS seguro -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Conta de Destino</label>
+                        <select id="transferTo" required onchange="validateTransferAccounts()" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white">
+                            <!-- Preenchido via JS seguro -->
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Valor (R$)</label>
+                        <input type="number" step="0.01" min="0.01" id="transferAmount" required class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white" placeholder="0,00">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Data</label>
+                        <input type="date" id="transferDate" required class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-400 mb-1">Descrição / Observação</label>
+                    <input type="text" id="transferDesc" class="w-full bg-gray-50 dark:bg-gray-950 border border-gray-300 dark:border-gray-800 rounded-xl p-2.5 text-sm text-gray-900 dark:text-white" placeholder="Ex: Transferência para poupança">
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-gray-200 dark:border-gray-800">
+                    <button type="button" onclick="closeModal('modalTransfer')" class="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-gray-700 dark:hover:text-white">Cancelar</button>
+                    <button type="submit" id="btnSaveTransfer" class="px-4 py-2 text-xs font-semibold bg-brand-500 hover:bg-brand-600 text-white rounded-xl">Efetuar Transferência</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE HISTÓRICO DA CONTA -->
+    <div id="modalAccountHistory" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl max-w-3xl w-full p-6 space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 pb-3">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white" id="historyModalTitle">Histórico da Conta</h3>
+                    <p class="text-xs text-gray-400" id="historyModalSubtitle">Movimentações vinculadas</p>
+                </div>
+                <button onclick="closeModal('modalAccountHistory')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
+                <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+                    <thead class="bg-gray-100 dark:bg-gray-950/50 text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800 sticky top-0">
+                        <tr>
+                            <th class="p-3">Data</th>
+                            <th class="p-3">Descrição</th>
+                            <th class="p-3">Categoria</th>
+                            <th class="p-3">Tipo</th>
+                            <th class="p-3 text-right">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountHistoryList" class="divide-y divide-gray-200 dark:divide-gray-800">
+                        <!-- Injetado via JS seguro -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-end pt-3 border-t border-gray-200 dark:border-gray-800">
+                <button type="button" onclick="closeModal('modalAccountHistory')" class="px-4 py-2 text-xs font-semibold bg-gray-800 text-white rounded-xl">Fechar</button>
+            </div>
         </div>
     </div>
 
@@ -281,6 +440,10 @@
         let currentUser = null;
         let isRegistering = false;
         let transactions = [];
+        let accounts = [];
+        
+        let unsubAccounts = null;
+        let unsubTransactions = null;
 
         // GERENCIAMENTO DE TEMA (DARK / LIGHT)
         function initTheme() {
@@ -300,11 +463,30 @@
             document.getElementById('themeIcon').className = isDark ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
         }
 
+        function getLocalDateString() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function isValidDate(dateString) {
+            if (!dateString || typeof dateString !== 'string') return false;
+            const regEx = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateString.match(regEx)) return false;
+            const d = new Date(dateString);
+            const dNum = d.getTime();
+            if (!dNum && dNum !== 0) return false;
+            return d.toISOString().slice(0, 10) === dateString;
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             initTheme();
-            const today = new Date().toISOString().substring(0, 7);
-            document.getElementById('filterPeriod').value = today;
-            document.getElementById('txDate').value = new Date().toISOString().substring(0, 10);
+            const todayPeriod = getLocalDateString().substring(0, 7);
+            document.getElementById('filterPeriod').value = todayPeriod;
+            document.getElementById('txDate').value = getLocalDateString();
+            document.getElementById('transferDate').value = getLocalDateString();
 
             auth.onAuthStateChanged(user => {
                 if (user) {
@@ -312,15 +494,63 @@
                     document.getElementById('authScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
                     document.getElementById('userEmailDisplay').innerText = user.email;
-                    listenToTransactions();
+                    startListeners();
                 } else {
                     currentUser = null;
                     transactions = [];
+                    accounts = [];
+                    stopListeners();
                     document.getElementById('authScreen').classList.remove('hidden');
                     document.getElementById('appScreen').classList.add('hidden');
                 }
             });
         });
+
+        // 3. ATUALIZAÇÃO DOS LISTENERS: substituição de Date.now() por 0 e desempate por ID
+        function startListeners() {
+            if (!currentUser) return;
+            stopListeners();
+
+            unsubAccounts = db.collection('users').doc(currentUser.uid).collection('accounts')
+              .onSnapshot(snapshot => {
+                  accounts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                  renderApp();
+              }, error => {
+                  console.error("Erro ao ler contas:", error);
+              });
+
+            const sync = document.getElementById('syncStatus');
+            sync.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
+
+            unsubTransactions = db.collection('users').doc(currentUser.uid).collection('transactions')
+              .onSnapshot(snapshot => {
+                  transactions = snapshot.docs.map(doc => {
+                      const data = doc.data();
+                      const millis = data.createdAt && data.createdAt.toMillis ? data.createdAt.toMillis() : 0;
+                      return {
+                          id: doc.id,
+                          ...data,
+                          createdAtMillis: millis
+                      };
+                  });
+                  sync.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+                  renderApp();
+              }, error => {
+                  console.error("Erro ao ler lançamentos:", error);
+                  sync.className = "w-2.5 h-2.5 rounded-full bg-rose-500";
+              });
+        }
+
+        function stopListeners() {
+            if (unsubAccounts) {
+                unsubAccounts();
+                unsubAccounts = null;
+            }
+            if (unsubTransactions) {
+                unsubTransactions();
+                unsubTransactions = null;
+            }
+        }
 
         function toggleAuthMode() {
             isRegistering = !isRegistering;
@@ -349,6 +579,7 @@
         }
 
         function logout() {
+            stopListeners();
             auth.signOut();
         }
 
@@ -376,27 +607,273 @@
             document.getElementById('pageTitle').innerText = pageTitles[tabName] || 'FinançasPRO';
         }
 
-        // LEITURA EM TEMPO REAL DAS TRANSAÇÕES
-        function listenToTransactions() {
+        // 2 & 4. SALVAR CONTA COM VALIDAÇÃO DE CAMPO VAZIO E VERIFICAÇÃO DE EXISTÊNCIA NA EDIÇÃO
+        async function saveAccount(e) {
+            e.preventDefault();
             if (!currentUser) return;
-            const sync = document.getElementById('syncStatus');
-            sync.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
 
-            db.collection('users').doc(currentUser.uid).collection('transactions')
-              .onSnapshot(snapshot => {
-                  transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                  sync.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
-                  renderApp();
-              }, error => {
-                  console.error("Erro ao ler lançamentos:", error);
-                  sync.className = "w-2.5 h-2.5 rounded-full bg-rose-500";
-              });
+            const name = document.getElementById('accName').value.trim();
+            const bank = document.getElementById('accBank').value.trim();
+            const initialBalanceInput = document.getElementById('accInitialBalance').value;
+            const baseDate = document.getElementById('accBaseDate').value;
+            const id = document.getElementById('accId').value;
+
+            if (!name || !bank) {
+                alert("Preencha o nome da conta e a instituição financeira.");
+                return;
+            }
+
+            // Validação rigorosa: verifica se o campo de saldo inicial está preenchido (não aceita vazio como zero)
+            if (initialBalanceInput === '' || initialBalanceInput === null || initialBalanceInput === undefined) {
+                alert("O campo de saldo inicial é obrigatório.");
+                return;
+            }
+
+            const initialBalance = Number(initialBalanceInput);
+            if (!Number.isFinite(initialBalance)) {
+                alert("Informe um valor numérico válido para o saldo inicial.");
+                return;
+            }
+
+            if (!isValidDate(baseDate)) {
+                alert("Informe uma data-base válida no formato correto.");
+                return;
+            }
+
+            // Verificação de conta na edição: se houver ID, garante que a conta existe no array accounts
+            if (id) {
+                const existingAcc = accounts.find(a => a.id === id);
+                if (!existingAcc) {
+                    alert("Erro: A conta que você está tentando editar não existe mais ou foi excluída.");
+                    return;
+                }
+
+                const balanceChanged = Number(existingAcc.initialBalance) !== initialBalance;
+                const dateChanged = existingAcc.baseDate !== baseDate;
+                if (balanceChanged || dateChanged) {
+                    const confirmed = confirm("Aviso: Alterar o saldo inicial ou a data-base recalculará o saldo atual desta conta. Deseja prosseguir?");
+                    if (!confirmed) return;
+                }
+            }
+
+            const btn = document.getElementById('btnSaveAcc');
+            btn.disabled = true;
+            btn.innerText = "Salvando...";
+
+            const accData = {
+                name: name,
+                bank: bank,
+                type: document.getElementById('accType').value,
+                initialBalance: initialBalance,
+                baseDate: baseDate,
+                description: document.getElementById('accDescription').value.trim(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                const colRef = db.collection('users').doc(currentUser.uid).collection('accounts');
+                if (id) {
+                    await colRef.doc(id).update(accData);
+                } else {
+                    accData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    await colRef.add(accData);
+                }
+                closeModal('modalAccount');
+            } catch (err) {
+                alert("Erro ao salvar conta: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Salvar Conta";
+            }
         }
 
-        // SALVAR LANÇAMENTO NO FIRESTORE
+        async function deleteAccount(id) {
+            const hasTxs = transactions.some(t => t.accountId === id || t.transferToAccountId === id);
+            if (hasTxs) {
+                alert("Não é possível excluir esta conta pois existem lançamentos ou transferências vinculados a ela.");
+                return;
+            }
+
+            if (!confirm("Tem certeza de que deseja excluir esta conta?")) return;
+            try {
+                await db.collection('users').doc(currentUser.uid).collection('accounts').doc(id).delete();
+            } catch (err) {
+                alert("Erro ao excluir conta: " + err.message);
+            }
+        }
+
+        function openAccountModal(id = null) {
+            const form = document.getElementById('formAccount');
+            form.reset();
+            document.getElementById('accId').value = '';
+            document.getElementById('modalAccountTitle').innerText = 'Nova Conta Bancária';
+            document.getElementById('accBaseDate').value = getLocalDateString();
+
+            if (id) {
+                const acc = accounts.find(a => a.id === id);
+                if (acc) {
+                    document.getElementById('accId').value = acc.id;
+                    document.getElementById('modalAccountTitle').innerText = 'Editar Conta Bancária';
+                    document.getElementById('accName').value = acc.name;
+                    document.getElementById('accBank').value = acc.bank;
+                    document.getElementById('accType').value = acc.type;
+                    document.getElementById('accInitialBalance').value = acc.initialBalance;
+                    document.getElementById('accBaseDate').value = acc.baseDate || getLocalDateString();
+                    document.getElementById('accDescription').value = acc.description || '';
+                }
+            }
+            document.getElementById('modalAccount').classList.remove('hidden');
+        }
+
+        function openTransferModal() {
+            if (accounts.length < 2) {
+                alert("Você precisa cadastrar pelo menos duas contas para realizar transferências.");
+                switchTab('accounts');
+                return;
+            }
+
+            document.getElementById('formTransfer').reset();
+            document.getElementById('transferDate').value = getLocalDateString();
+
+            const fromSelect = document.getElementById('transferFrom');
+            const toSelect = document.getElementById('transferTo');
+            
+            fromSelect.innerHTML = '';
+            toSelect.innerHTML = '';
+
+            accounts.forEach(acc => {
+                const opt1 = document.createElement('option');
+                opt1.value = acc.id;
+                opt1.textContent = `${acc.name} (${acc.bank})`;
+                fromSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = acc.id;
+                opt2.textContent = `${acc.name} (${acc.bank})`;
+                toSelect.appendChild(opt2);
+            });
+
+            if (accounts.length > 1) {
+                toSelect.selectedIndex = 1;
+            }
+            validateTransferAccounts();
+
+            document.getElementById('modalTransfer').classList.remove('hidden');
+        }
+
+        function validateTransferAccounts() {
+            const fromSelect = document.getElementById('transferFrom');
+            const toSelect = document.getElementById('transferTo');
+            if (fromSelect.value === toSelect.value && accounts.length > 1) {
+                for (let i = 0; i < toSelect.options.length; i++) {
+                    if (toSelect.options[i].value !== fromSelect.value) {
+                        toSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        async function saveTransfer(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const fromId = document.getElementById('transferFrom').value;
+            const toId = document.getElementById('transferTo').value;
+
+            const originExists = accounts.some(a => a.id === fromId);
+            const destExists = accounts.some(a => a.id === toId);
+            if (!originExists || !destExists) {
+                alert("Uma ou ambas as contas selecionadas não existem mais.");
+                return;
+            }
+
+            if (fromId === toId) {
+                alert("A conta de origem e a conta de destino devem ser diferentes.");
+                return;
+            }
+
+            const amountInput = document.getElementById('transferAmount').value;
+            const amount = Number(amountInput);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                alert("Informe um valor numérico válido e estritamente maior que zero para a transferência.");
+                return;
+            }
+
+            const date = document.getElementById('transferDate').value;
+            if (!isValidDate(date)) {
+                alert("Informe uma data válida para a transferência.");
+                return;
+            }
+
+            const desc = document.getElementById('transferDesc').value.trim() || 'Transferência entre contas';
+
+            const btn = document.getElementById('btnSaveTransfer');
+            btn.disabled = true;
+            btn.innerText = "Processando...";
+
+            const txData = {
+                description: desc,
+                amount: amount,
+                date: date,
+                type: 'TRANSFER',
+                category: 'Transferência',
+                accountId: fromId,
+                transferToAccountId: toId,
+                paymentMethod: 'Transferência',
+                notes: 'Transferência entre contas cadastradas',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                await db.collection('users').doc(currentUser.uid).collection('transactions').add(txData);
+                closeModal('modalTransfer');
+            } catch (err) {
+                alert("Erro ao realizar transferência: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Efetuar Transferência";
+            }
+        }
+
+        // 1. SALVAR LANÇAMENTO COM VALIDAÇÃO ESTRITA DO TIPO (Apenas INCOME ou EXPENSE)
         async function saveTransaction(e) {
             e.preventDefault();
             if (!currentUser) return;
+
+            const description = document.getElementById('txDescription').value.trim();
+            const amountInput = document.getElementById('txAmount').value;
+            const amount = Number(amountInput);
+            const date = document.getElementById('txDate').value;
+            const type = document.getElementById('txType').value;
+            const accountId = document.getElementById('txAccount').value;
+
+            // Validação estrita do tipo de lançamento
+            if (type !== 'INCOME' && type !== 'EXPENSE') {
+                alert("Tipo de lançamento inválido. Permitido apenas Receita (INCOME) ou Despesa (EXPENSE).");
+                return;
+            }
+
+            if (!description) {
+                alert("Informe a descrição do lançamento.");
+                return;
+            }
+            if (!Number.isFinite(amount) || amount <= 0) {
+                alert("Informe um valor numérico válido e estritamente maior que zero para receitas e despesas.");
+                return;
+            }
+            if (!isValidDate(date)) {
+                alert("Informe uma data válida.");
+                return;
+            }
+
+            if (accountId) {
+                const accExists = accounts.some(a => a.id === accountId);
+                if (!accExists) {
+                    alert("A conta selecionada não existe.");
+                    return;
+                }
+            }
 
             const btn = document.getElementById('btnSaveTx');
             btn.disabled = true;
@@ -404,11 +881,12 @@
 
             const id = document.getElementById('txId').value;
             const txData = {
-                description: document.getElementById('txDescription').value.trim(),
-                amount: parseFloat(document.getElementById('txAmount').value),
-                date: document.getElementById('txDate').value,
-                type: document.getElementById('txType').value,
+                description: description,
+                amount: amount,
+                date: date,
+                type: type,
                 category: document.getElementById('txCategory').value,
+                accountId: accountId || '',
                 paymentMethod: document.getElementById('txPaymentMethod').value,
                 notes: document.getElementById('txNotes').value.trim(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -431,7 +909,6 @@
             }
         }
 
-        // EXCLUIR LANÇAMENTO
         async function deleteTransaction(id) {
             if (!confirm("Tem certeza de que deseja excluir este lançamento?")) return;
             try {
@@ -441,13 +918,27 @@
             }
         }
 
-        // ABRIR/FECHAR MODAL
         function openTransactionModal(id = null) {
             const form = document.getElementById('formTransaction');
             form.reset();
             document.getElementById('txId').value = '';
             document.getElementById('modalTxTitle').innerText = 'Novo Lançamento';
-            document.getElementById('txDate').value = new Date().toISOString().substring(0, 10);
+            document.getElementById('txDate').value = getLocalDateString();
+
+            const accSelect = document.getElementById('txAccount');
+            accSelect.innerHTML = '';
+            
+            const optNone = document.createElement('option');
+            optNone.value = '';
+            optNone.textContent = 'Sem conta específica (Geral)';
+            accSelect.appendChild(optNone);
+
+            accounts.forEach(acc => {
+                const opt = document.createElement('option');
+                opt.value = acc.id;
+                opt.textContent = `${acc.name} (${acc.bank})`;
+                accSelect.appendChild(opt);
+            });
 
             if (id) {
                 const tx = transactions.find(t => t.id === id);
@@ -459,7 +950,8 @@
                     document.getElementById('txDate').value = tx.date;
                     document.getElementById('txType').value = tx.type;
                     document.getElementById('txCategory').value = tx.category;
-                    document.getElementById('txPaymentMethod').value = tx.paymentMethod || 'Pix';
+                    if (tx.accountId) accSelect.value = tx.accountId;
+                    if (tx.paymentMethod) document.getElementById('txPaymentMethod').value = tx.paymentMethod;
                     document.getElementById('txNotes').value = tx.notes || '';
                 }
             }
@@ -470,10 +962,282 @@
             document.getElementById(id).classList.add('hidden');
         }
 
-        // RENDERIZAÇÃO DA APLICAÇÃO E TABELAS
         function renderApp() {
+            renderAccounts();
             renderDashboard();
             renderTransactions();
+        }
+
+        function calculateAccountCurrentBalance(accountId) {
+            const acc = accounts.find(a => a.id === accountId);
+            if (!acc) return 0;
+
+            let balance = Number(acc.initialBalance) || 0;
+            const baseDate = acc.baseDate || '1970-01-01';
+
+            transactions.forEach(t => {
+                if (t.date && t.date > baseDate) {
+                    if (t.type === 'INCOME' && t.accountId === accountId) {
+                        balance += Number(t.amount);
+                    } else if (t.type === 'EXPENSE' && t.accountId === accountId) {
+                        balance -= Number(t.amount);
+                    } else if (t.type === 'TRANSFER') {
+                        if (t.accountId === accountId) {
+                            balance -= Number(t.amount);
+                        }
+                        if (t.transferToAccountId === accountId) {
+                            balance += Number(t.amount);
+                        }
+                    }
+                }
+            });
+
+            return balance;
+        }
+
+        // ORDENAÇÃO ESTÁVEL UTILIZANDO CRITÉRIO SECUNDÁRIO DE MILISSEGUNDOS E ID
+        function stableSortComparator(a, b) {
+            if (b.date !== a.date) {
+                return new Date(b.date) - new Date(a.date);
+            }
+            const timeA = a.createdAtMillis || 0;
+            const timeB = b.createdAtMillis || 0;
+            if (timeB !== timeA) {
+                return timeB - timeA;
+            }
+            return String(b.id).localeCompare(String(a.id));
+        }
+
+        function openAccountHistoryModal(accountId) {
+            const acc = accounts.find(a => a.id === accountId);
+            if (!acc) return;
+
+            document.getElementById('historyModalTitle').textContent = `Histórico: ${acc.name} (${acc.bank})`;
+            document.getElementById('historyModalSubtitle').textContent = `Saldo Inicial: ${formatCurrency(acc.initialBalance)} (Data-base: ${formatDate(acc.baseDate)})`;
+
+            const tbody = document.getElementById('accountHistoryList');
+            tbody.innerHTML = '';
+
+            const accTxs = transactions.filter(t => 
+                t.accountId === accountId || t.transferToAccountId === accountId
+            );
+
+            accTxs.sort(stableSortComparator);
+
+            const baseDate = acc.baseDate || '1970-01-01';
+
+            if (accTxs.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 5;
+                td.className = "p-4 text-center text-gray-400";
+                td.textContent = "Nenhuma movimentação registrada nesta conta.";
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            } else {
+                accTxs.forEach(t => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/40 transition";
+
+                    const isBeforeOrEqualBase = t.date <= baseDate;
+                    if (isBeforeOrEqualBase) {
+                        tr.className += " opacity-60 bg-amber-500/5";
+                    }
+
+                    const tdDate = document.createElement('td');
+                    tdDate.className = "p-3 whitespace-nowrap text-xs flex items-center gap-1.5";
+                    
+                    const spanDateText = document.createElement('span');
+                    spanDateText.textContent = formatDate(t.date);
+                    tdDate.appendChild(spanDateText);
+
+                    if (isBeforeOrEqualBase) {
+                        const badge = document.createElement('span');
+                        badge.className = "px-1.5 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] rounded font-medium";
+                        badge.title = "Movimentação anterior ou igual à data-base (não afeta o saldo atual)";
+                        badge.textContent = "Ignorada no Saldo";
+                        tdDate.appendChild(badge);
+                    }
+                    tr.appendChild(tdDate);
+
+                    const tdDesc = document.createElement('td');
+                    tdDesc.className = "p-3 font-semibold text-gray-900 dark:text-white text-xs";
+                    tdDesc.textContent = t.description || '';
+                    if (t.notes) {
+                        const sub = document.createElement('div');
+                        sub.className = "text-[11px] text-gray-400 font-normal";
+                        sub.textContent = t.notes;
+                        tdDesc.appendChild(sub);
+                    }
+                    tr.appendChild(tdDesc);
+
+                    const tdCat = document.createElement('td');
+                    tdCat.className = "p-3 whitespace-nowrap text-xs";
+                    const spanCat = document.createElement('span');
+                    spanCat.className = "px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-[11px] rounded-md text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700";
+                    spanCat.textContent = t.category || (t.type === 'TRANSFER' ? 'Transferência' : 'Outros');
+                    tdCat.appendChild(spanCat);
+                    tr.appendChild(tdCat);
+
+                    const tdType = document.createElement('td');
+                    tdType.className = "p-3 whitespace-nowrap text-xs";
+                    let typeLabel = t.type;
+                    let typeClass = "text-gray-400";
+                    if (t.type === 'INCOME') {
+                        typeLabel = 'Receita';
+                        typeClass = "text-emerald-600 dark:text-emerald-400 font-semibold";
+                    } else if (t.type === 'EXPENSE') {
+                        typeLabel = 'Despesa';
+                        typeClass = "text-rose-600 dark:text-rose-400 font-semibold";
+                    } else if (t.type === 'TRANSFER') {
+                        if (t.accountId === accountId) {
+                            typeLabel = 'Transferência (Enviada)';
+                            typeClass = "text-blue-600 dark:text-blue-400 font-semibold";
+                        } else {
+                            typeLabel = 'Transferência (Recebida)';
+                            typeClass = "text-blue-600 dark:text-blue-400 font-semibold";
+                        }
+                    }
+                    tdType.className += ` ${typeClass}`;
+                    tdType.textContent = typeLabel;
+                    tr.appendChild(tdType);
+
+                    const tdVal = document.createElement('td');
+                    tdVal.className = "p-3 text-right font-bold whitespace-nowrap text-xs";
+                    let isPositive = t.type === 'INCOME' || (t.type === 'TRANSFER' && t.transferToAccountId === accountId);
+                    tdVal.className += isPositive ? " text-emerald-600 dark:text-emerald-400" : " text-rose-600 dark:text-rose-400";
+                    tdVal.textContent = (isPositive ? '+ ' : '- ') + formatCurrency(t.amount);
+                    tr.appendChild(tdVal);
+
+                    tbody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('modalAccountHistory').classList.remove('hidden');
+        }
+
+        function renderAccounts() {
+            const grid = document.getElementById('accountsGrid');
+            if (!grid) return;
+
+            grid.innerHTML = '';
+
+            if (accounts.length === 0) {
+                const divEmpty = document.createElement('div');
+                divEmpty.className = "col-span-full p-8 text-center bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 text-gray-500";
+                
+                const icon = document.createElement('i');
+                icon.className = "fa-solid fa-building-columns text-3xl mb-2 text-brand-500";
+                divEmpty.appendChild(icon);
+
+                const pTitle = document.createElement('p');
+                pTitle.className = "font-medium text-gray-900 dark:text-white";
+                pTitle.textContent = "Nenhuma conta cadastrada";
+                divEmpty.appendChild(pTitle);
+
+                const pSub = document.createElement('p');
+                pSub.className = "text-xs text-gray-400 mt-1";
+                pSub.textContent = "Cadastre sua primeira conta para gerenciar saldos e transferências.";
+                divEmpty.appendChild(pSub);
+
+                const btn = document.createElement('button');
+                btn.className = "mt-4 px-4 py-2 bg-brand-500 text-white rounded-xl text-xs font-semibold";
+                btn.textContent = "Cadastrar Conta";
+                btn.onclick = () => openAccountModal();
+                divEmpty.appendChild(btn);
+
+                grid.appendChild(divEmpty);
+                return;
+            }
+
+            accounts.forEach(acc => {
+                const currentBalance = calculateAccountCurrentBalance(acc.id);
+
+                const card = document.createElement('div');
+                card.className = "bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-4 shadow-sm flex flex-col justify-between";
+
+                const topDiv = document.createElement('div');
+                
+                const headerDiv = document.createElement('div');
+                headerDiv.className = "flex justify-between items-start";
+
+                const titlesDiv = document.createElement('div');
+                const spanMeta = document.createElement('span');
+                spanMeta.className = "text-xs font-medium text-brand-600 dark:text-brand-400 uppercase tracking-wider";
+                spanMeta.textContent = `${acc.bank} • ${acc.type}`;
+                titlesDiv.appendChild(spanMeta);
+
+                const h3 = document.createElement('h3');
+                h3.className = "text-lg font-bold text-gray-900 dark:text-white mt-0.5";
+                h3.textContent = acc.name;
+                titlesDiv.appendChild(h3);
+                headerDiv.appendChild(titlesDiv);
+
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = "flex gap-1";
+
+                const btnHistory = document.createElement('button');
+                btnHistory.className = "p-1.5 text-gray-400 hover:text-brand-500 rounded-lg";
+                btnHistory.title = "Ver Histórico";
+                btnHistory.innerHTML = '<i class="fa-solid fa-clock-rotate-left text-xs"></i>';
+                btnHistory.onclick = () => openAccountHistoryModal(acc.id);
+                actionsDiv.appendChild(btnHistory);
+
+                const btnEdit = document.createElement('button');
+                btnEdit.className = "p-1.5 text-gray-400 hover:text-brand-500 rounded-lg";
+                btnEdit.title = "Editar Conta";
+                btnEdit.innerHTML = '<i class="fa-solid fa-pen text-xs"></i>';
+                btnEdit.onclick = () => openAccountModal(acc.id);
+                actionsDiv.appendChild(btnEdit);
+
+                const btnDel = document.createElement('button');
+                btnDel.className = "p-1.5 text-rose-500 hover:text-rose-700 rounded-lg";
+                btnDel.title = "Excluir Conta";
+                btnDel.innerHTML = '<i class="fa-solid fa-trash text-xs"></i>';
+                btnDel.onclick = () => deleteAccount(acc.id);
+                actionsDiv.appendChild(btnDel);
+
+                headerDiv.appendChild(actionsDiv);
+                topDiv.appendChild(headerDiv);
+
+                if (acc.description) {
+                    const pDesc = document.createElement('p');
+                    pDesc.className = "text-xs text-gray-400 mt-1";
+                    pDesc.textContent = acc.description;
+                    topDiv.appendChild(pDesc);
+                }
+                card.appendChild(topDiv);
+
+                const bottomDiv = document.createElement('div');
+                bottomDiv.className = "pt-4 border-t border-gray-100 dark:border-gray-800 grid grid-cols-2 gap-2 text-xs";
+
+                const boxInit = document.createElement('div');
+                boxInit.className = "bg-gray-50 dark:bg-gray-950 p-2.5 rounded-xl";
+                const spanInitLabel = document.createElement('span');
+                spanInitLabel.className = "text-gray-400 block";
+                spanInitLabel.textContent = "Saldo Inicial";
+                boxInit.appendChild(spanInitLabel);
+                const spanInitVal = document.createElement('span');
+                spanInitVal.className = "font-semibold text-gray-700 dark:text-gray-300";
+                spanInitVal.textContent = formatCurrency(acc.initialBalance);
+                boxInit.appendChild(spanInitVal);
+                bottomDiv.appendChild(boxInit);
+
+                const boxCurr = document.createElement('div');
+                boxCurr.className = "bg-gray-50 dark:bg-gray-950 p-2.5 rounded-xl";
+                const spanCurrLabel = document.createElement('span');
+                spanCurrLabel.className = "text-gray-400 block";
+                spanCurrLabel.textContent = "Saldo Atual";
+                boxCurr.appendChild(spanCurrLabel);
+                const spanCurrVal = document.createElement('span');
+                spanCurrVal.className = `font-bold ${currentBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
+                spanCurrVal.textContent = formatCurrency(currentBalance);
+                boxCurr.appendChild(spanCurrVal);
+                bottomDiv.appendChild(boxCurr);
+
+                card.appendChild(bottomDiv);
+                grid.appendChild(card);
+            });
         }
 
         function renderDashboard() {
@@ -484,23 +1248,32 @@
             let expense = 0;
 
             monthTxs.forEach(t => {
-                if (t.type === 'INCOME') income += t.amount;
-                if (t.type === 'EXPENSE') expense += t.amount;
+                if (t.type === 'INCOME') income += Number(t.amount);
+                if (t.type === 'EXPENSE') expense += Number(t.amount);
             });
 
-            let totalBalance = 0;
+            let totalAccountsBalance = 0;
+            accounts.forEach(acc => {
+                totalAccountsBalance += calculateAccountCurrentBalance(acc.id);
+            });
+
+            let unassignedBalance = 0;
             transactions.forEach(t => {
-                if (t.type === 'INCOME') totalBalance += t.amount;
-                if (t.type === 'EXPENSE') totalBalance -= t.amount;
+                const hasAccount = accounts.some(a => a.id === t.accountId);
+                if (!t.accountId || !hasAccount) {
+                    if (t.type === 'INCOME') unassignedBalance += Number(t.amount);
+                    if (t.type === 'EXPENSE') unassignedBalance -= Number(t.amount);
+                }
             });
 
-            document.getElementById('dashTotalBalance').innerText = formatCurrency(totalBalance);
+            const grandTotalBalance = totalAccountsBalance + unassignedBalance;
+
+            document.getElementById('dashTotalBalance').innerText = formatCurrency(grandTotalBalance);
             document.getElementById('dashIncome').innerText = formatCurrency(income);
             document.getElementById('dashExpense').innerText = formatCurrency(expense);
             document.getElementById('dashBalance').innerText = formatCurrency(income - expense);
         }
 
-        // FUNÇÃO SEGURA CONTRA XSS (USA DOMPurify/textContent nativo seguro)
         function renderTransactions() {
             const list = document.getElementById('transactionList');
             const period = document.getElementById('filterPeriod').value;
@@ -514,7 +1287,7 @@
             if (categoryFilter !== 'ALL') filtered = filtered.filter(t => t.category === categoryFilter);
             if (searchFilter) filtered = filtered.filter(t => t.description && t.description.toLowerCase().includes(searchFilter));
 
-            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            filtered.sort(stableSortComparator);
 
             document.getElementById('txCount').innerText = `${filtered.length} lançamento(s)`;
 
@@ -522,7 +1295,11 @@
 
             if (filtered.length === 0) {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td colspan="6" class="p-4 text-center text-gray-400">Nenhum lançamento encontrado para os filtros selecionados.</td>`;
+                const td = document.createElement('td');
+                td.colSpan = 7;
+                td.className = "p-4 text-center text-gray-400";
+                td.textContent = "Nenhum lançamento encontrado para os filtros selecionados.";
+                tr.appendChild(td);
                 list.appendChild(tr);
                 return;
             }
@@ -531,13 +1308,11 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/40 transition";
 
-                // Coluna Data
                 const tdDate = document.createElement('td');
                 tdDate.className = "p-4 whitespace-nowrap";
                 tdDate.textContent = formatDate(t.date);
                 tr.appendChild(tdDate);
 
-                // Coluna Descrição e Notas (Seguro contra XSS via textContent)
                 const tdDesc = document.createElement('td');
                 tdDesc.className = "p-4 font-semibold text-gray-900 dark:text-white";
                 
@@ -553,7 +1328,6 @@
                 }
                 tr.appendChild(tdDesc);
 
-                // Coluna Categoria
                 const tdCat = document.createElement('td');
                 tdCat.className = "p-4 whitespace-nowrap";
                 const spanCat = document.createElement('span');
@@ -562,41 +1336,50 @@
                 tdCat.appendChild(spanCat);
                 tr.appendChild(tdCat);
 
-                // Coluna Pagamento
+                const tdAcc = document.createElement('td');
+                tdAcc.className = "p-4 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400";
+                if (t.type === 'TRANSFER') {
+                    const fromAcc = accounts.find(a => a.id === t.accountId);
+                    const toAcc = accounts.find(a => a.id === t.transferToAccountId);
+                    tdAcc.textContent = `${fromAcc ? fromAcc.name : 'Origem'} ➔ ${toAcc ? toAcc.name : 'Destino'}`;
+                } else {
+                    const acc = accounts.find(a => a.id === t.accountId);
+                    tdAcc.textContent = acc ? acc.name : 'Geral / Sem conta';
+                }
+                tr.appendChild(tdAcc);
+
                 const tdPay = document.createElement('td');
                 tdPay.className = "p-4 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400";
                 tdPay.textContent = t.paymentMethod || '-';
                 tr.appendChild(tdPay);
 
-                // Coluna Valor
                 const tdVal = document.createElement('td');
-                tdVal.className = `p-4 text-right font-bold whitespace-nowrap ${t.type === 'INCOME' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
-                tdVal.textContent = (t.type === 'INCOME' ? '+ ' : '- ') + formatCurrency(t.amount);
+                tdVal.className = `p-4 text-right font-bold whitespace-nowrap ${t.type === 'INCOME' ? 'text-emerald-600 dark:text-emerald-400' : t.type === 'EXPENSE' ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-blue-400'}`;
+                tdVal.textContent = (t.type === 'INCOME' ? '+ ' : t.type === 'EXPENSE' ? '- ' : '⇄ ') + formatCurrency(t.amount);
                 tr.appendChild(tdVal);
 
-                // Coluna Ações
                 const tdActions = document.createElement('td');
                 tdActions.className = "p-4 text-center whitespace-nowrap space-x-2";
 
-                const btnEdit = document.createElement('button');
-                btnEdit.className = "p-1.5 text-gray-400 hover:text-brand-500";
-                btnEdit.innerHTML = '<i class="fa-solid fa-pen"></i>';
-                btnEdit.onclick = () => openTransactionModal(t.id);
+                if (t.type !== 'TRANSFER') {
+                    const btnEdit = document.createElement('button');
+                    btnEdit.className = "p-1.5 text-gray-400 hover:text-brand-500";
+                    btnEdit.innerHTML = '<i class="fa-solid fa-pen"></i>';
+                    btnEdit.onclick = () => openTransactionModal(t.id);
+                    tdActions.appendChild(btnEdit);
+                }
 
                 const btnDel = document.createElement('button');
                 btnDel.className = "p-1.5 text-rose-500 hover:text-rose-700";
                 btnDel.innerHTML = '<i class="fa-solid fa-trash"></i>';
                 btnDel.onclick = () => deleteTransaction(t.id);
-
-                tdActions.appendChild(btnEdit);
                 tdActions.appendChild(btnDel);
-                tr.appendChild(tdActions);
 
+                tr.appendChild(tdActions);
                 list.appendChild(tr);
             });
         }
 
-        // AUXILIARES
         function formatCurrency(val) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
         }
