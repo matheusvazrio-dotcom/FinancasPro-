@@ -976,7 +976,7 @@
             const baseDate = acc.baseDate || '1970-01-01';
 
             transactions.forEach(t => {
-                if (t.date && t.date > baseDate) {
+                if (t.date && t.date >= baseDate) {
                     if (t.type === 'INCOME' && t.accountId === accountId) {
                         balance += Number(t.amount);
                     } else if (t.type === 'EXPENSE' && t.accountId === accountId) {
